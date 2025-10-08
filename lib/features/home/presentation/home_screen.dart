@@ -1,15 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:etic_mobile/core/router/app_routes.dart';
 
+/// Pantalla principal que actúa como panel de control del sistema.
+///
+/// Contiene el menú lateral con navegación a las secciones:
+/// - Inicio
+/// - Inspecciones
+/// - Sitios
+/// - Clientes
+/// - Reportes
+/// - Ajustes
+///
+/// Además, incluye un botón en la AppBar para cerrar sesión.
 class HomeScreen extends StatefulWidget {
+  /// Crea una instancia de [HomeScreen].
+  ///
+  /// Requiere un callback [onLogout] que se ejecutará cuando el usuario
+  /// presione el botón de cerrar sesión.
   const HomeScreen({super.key, required this.onLogout});
 
+  /// Función que se ejecuta al cerrar sesión.
   final VoidCallback onLogout;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+/// Estado interno de [HomeScreen].
+///
+/// Administra las secciones disponibles en el menú lateral
+/// y controla la navegación dentro de la aplicación.
 class _HomeScreenState extends State<HomeScreen> {
   late final List<_HomeSection> _sections;
   int _selectedIndex = 0;
@@ -19,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _sections = const <_HomeSection>[
       _HomeSection(
-        label: 'Inicio',
+        label: 'Inspección Actual',
         icon: Icons.dashboard_outlined,
         route: AppRoutes.home,
       ),
@@ -51,12 +71,13 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
   }
 
+  /// Cambia la sección seleccionada y navega hacia la ruta correspondiente.
   void _openSection(int index) {
     setState(() => _selectedIndex = index);
     final route = _sections[index].route;
-    if (route == AppRoutes.home) {
-      return;
-    }
+
+    if (route == AppRoutes.home) return;
+
     Navigator.of(context).pushNamed(route);
   }
 
@@ -74,33 +95,45 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       drawer: Drawer(
+        backgroundColor: const Color(0xFF202327),
+        surfaceTintColor: Colors.transparent,
         child: SafeArea(
-          child: Column(
-            children: [
-              const ListTile(
-                leading: CircleAvatar(child: Icon(Icons.thermostat)),
-                title: Text('Inspecciones Térmicas'),
-                subtitle: Text('Versión demo'),
-              ),
-              const Divider(),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _sections.length,
-                  itemBuilder: (context, index) {
-                    final section = _sections[index];
-                    return ListTile(
-                      leading: Icon(section.icon),
-                      title: Text(section.label),
-                      selected: index == _selectedIndex,
-                      onTap: () {
-                        Navigator.pop(context);
-                        _openSection(index);
-                      },
-                    );
-                  },
+          child: ListTileTheme(
+            iconColor: Colors.white,
+            textColor: Colors.white,
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Image.asset(
+                    'assets/img_etic_menu.png',
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.contain,
+                  ),
+                  title: const Text('ETIC System'),
+                  subtitle: const Text('Rafael García'),
                 ),
-              ),
-            ],
+                const Divider(color: Colors.white24),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _sections.length,
+                    itemBuilder: (context, index) {
+                      final section = _sections[index];
+                      return ListTile(
+                        leading: Icon(section.icon),
+                        title: Text(section.label),
+                        selected: index == _selectedIndex,
+                        selectedTileColor: Colors.white12,
+                        onTap: () {
+                          Navigator.pop(context);
+                          _openSection(index);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -109,33 +142,37 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+/// Cuadrícula principal que muestra las tarjetas de acceso rápido.
+///
+/// Incluye accesos a las secciones más utilizadas del sistema
+/// como inspecciones, sitios, clientes, reportes y ajustes.
 class _HomeGrid extends StatelessWidget {
   const _HomeGrid();
 
   @override
   Widget build(BuildContext context) {
     final cards = <Widget>[
-      _HomeCard(
+      const _HomeCard(
         label: 'Nueva inspección',
         icon: Icons.add_task_outlined,
         route: AppRoutes.inspections,
       ),
-      _HomeCard(
+      const _HomeCard(
         label: 'Sitios',
         icon: Icons.factory_outlined,
         route: AppRoutes.sites,
       ),
-      _HomeCard(
+      const _HomeCard(
         label: 'Clientes',
         icon: Icons.people_alt_outlined,
         route: AppRoutes.clients,
       ),
-      _HomeCard(
+      const _HomeCard(
         label: 'Reportes',
         icon: Icons.bar_chart_outlined,
         route: AppRoutes.reports,
       ),
-      _HomeCard(
+      const _HomeCard(
         label: 'Ajustes',
         icon: Icons.settings_outlined,
         route: AppRoutes.settings,
@@ -156,6 +193,10 @@ class _HomeGrid extends StatelessWidget {
   }
 }
 
+/// Tarjeta individual que representa una sección dentro del [HomeScreen].
+///
+/// Cada tarjeta contiene un ícono y una etiqueta, y al presionarla
+/// navega a la ruta correspondiente mediante [Navigator.pushNamed].
 class _HomeCard extends StatelessWidget {
   const _HomeCard({
     required this.label,
@@ -163,8 +204,13 @@ class _HomeCard extends StatelessWidget {
     required this.route,
   });
 
+  /// Texto mostrado en la tarjeta.
   final String label;
+
+  /// Ícono principal de la tarjeta.
   final IconData icon;
+
+  /// Ruta a la que se navega al presionar la tarjeta.
   final String route;
 
   @override
@@ -178,9 +224,14 @@ class _HomeCard extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 42),
+              Icon(icon, size: 42, color: const Color(0xFF303030)),
               const SizedBox(height: 8),
-              Text(label, style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: const Color(0xFF303030),
+                    ),
+              ),
             ],
           ),
         ),
@@ -189,6 +240,10 @@ class _HomeCard extends StatelessWidget {
   }
 }
 
+/// Representa una sección dentro del menú lateral del [HomeScreen].
+///
+/// Cada sección contiene un [label], un [icon] y una [route]
+/// que define la pantalla a la que se navega.
 class _HomeSection {
   const _HomeSection({
     required this.label,
@@ -196,7 +251,12 @@ class _HomeSection {
     required this.route,
   });
 
+  /// Texto que identifica la sección.
   final String label;
+
+  /// Ícono que representa la sección.
   final IconData icon;
+
+  /// Ruta asociada a la sección.
   final String route;
 }

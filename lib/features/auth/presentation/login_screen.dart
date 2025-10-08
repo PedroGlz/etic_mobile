@@ -9,8 +9,8 @@ import 'package:etic_mobile/features/auth/domain/credentials.dart';
 /// Permite al usuario autenticarse mediante correo y contraseña.
 /// Si las credenciales son válidas, ejecuta la función [onLoginSuccess].
 ///
-/// Esta pantalla usa un formulario con validación, un gradiente de fondo,
-/// y muestra un `SnackBar` si las credenciales son incorrectas.
+/// Esta pantalla usa un formulario con validación y muestra un `SnackBar`
+/// si las credenciales son incorrectas.
 class LoginScreen extends StatefulWidget {
   /// Crea una instancia de [LoginScreen].
   ///
@@ -88,81 +88,82 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFAB0202), Colors.black],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Card(
-              elevation: 3,
-              margin: const EdgeInsets.all(24),
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Center(
-                        child: Image.asset(
-                          'assets/eticLogoLogin.png',
-                          height: 56,
-                        ),
+      // Fondo sólido para toda la pantalla
+      backgroundColor: const Color(0xFFAB0202),
+
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Card(
+            elevation: 3,
+            margin: const EdgeInsets.all(24),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Image.asset(
+                        'assets/eticLogoLogin.png',
+                        height: 56,
                       ),
-                      const SizedBox(height: 20),
-                      TextFormField(
-                        controller: _userCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Usuario',
-                          prefixIcon: Icon(Icons.person_outline),
-                        ),
-                        validator: (value) => requiredValidator(value),
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _userCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Usuario',
+                        prefixIcon: Icon(Icons.person_outline),
                       ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _passCtrl,
-                        obscureText: _obscure,
-                        decoration: InputDecoration(
-                          labelText: 'Contraseña',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            onPressed: () =>
-                                setState(() => _obscure = !_obscure),
-                            icon: Icon(
-                              _obscure
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                            ),
+                      validator: (value) => requiredValidator(value),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _passCtrl,
+                      obscureText: _obscure,
+                      decoration: InputDecoration(
+                        labelText: 'Contraseña',
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          onPressed: () =>
+                              setState(() => _obscure = !_obscure),
+                          icon: Icon(
+                            _obscure
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                           ),
                         ),
-                        validator: (value) => requiredValidator(value),
                       ),
-                      const SizedBox(height: 20),
-                      FilledButton(
-                        onPressed: _isLoading ? null : _login,
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Text('Ingresar'),
+                      validator: (value) => requiredValidator(value),
+                    ),
+                    const SizedBox(height: 20),
+                    FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF303030), // #303030
+                        foregroundColor: Colors.white, // texto/iconos blancos
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Demo: ${AppConstants.demoEmail} / ${AppConstants.demoPassword}',
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                      onPressed: _isLoading ? null : _login,
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text('Ingresar'),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Demo: ${AppConstants.demoEmail} / ${AppConstants.demoPassword}',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
             ),
