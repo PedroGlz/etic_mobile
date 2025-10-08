@@ -79,11 +79,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
                     TextFormField(
                       controller: _userCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Usuario (email)',
+                        labelText: 'Usuario',
                         prefixIcon: Icon(Icons.person_outline),
                       ),
                       validator: (value) => requiredValidator(value),
