@@ -138,7 +138,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      body: const _HomeGrid(),
+      body: _selectedIndex == 0
+          ? const _CurrentInspectionSplitView()
+          : const _HomeGrid(),
     );
   }
 }
@@ -235,6 +237,91 @@ class _HomeCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Vista dividida en 3 partes para "Inspecci��n Actual":
+/// - Parte superior con dos paneles iguales (izquierda y derecha).
+/// - Parte inferior ocupando todo el ancho.
+class _CurrentInspectionSplitView extends StatelessWidget {
+  const _CurrentInspectionSplitView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          // Fila superior: dos paneles iguales
+          Expanded(
+            child: Row(
+              children: const [
+                Expanded(child: _SplitPanel(title: 'Resumen', icon: Icons.info_outline)),
+                SizedBox(width: 16),
+                Expanded(child: _SplitPanel(title: 'Progreso', icon: Icons.timeline_outlined)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Panel inferior: ocupa todo el ancho
+          const Expanded(
+            child: _SplitPanel(title: 'Detalles', icon: Icons.view_list_outlined),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Panel gen��rico utilizado en la vista dividida.
+class _SplitPanel extends StatelessWidget {
+  const _SplitPanel({required this.title, required this.icon});
+
+  final String title;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        width: double.infinity,
+        height: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Center(
+                  child: Text(
+                    'Contenido pr��ximo aqu��',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
