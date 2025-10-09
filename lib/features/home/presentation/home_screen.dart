@@ -238,8 +238,87 @@ class _CurrentInspectionSplitViewState extends State<_CurrentInspectionSplitView
             id: 'i001-siteA',
             title: 'Sitio: Planta A',
             children: [
-              _TreeNode(id: 'i001-a1', title: 'Area 1', barcode: 'A1-0001', verified: true),
-              _TreeNode(id: 'i001-a2', title: 'Area 2', barcode: 'A2-0002', verified: false),
+              _TreeNode(
+                id: 'i001-a1',
+                title: 'Area 1',
+                barcode: 'A1-0001',
+                verified: true,
+                problems: [
+                  _Problem(
+                    no: 1,
+                    fecha: DateTime.now(),
+                    numInspeccion: 'INS-001',
+                    tipo: 'Térmica',
+                    estatus: 'Abierto',
+                    cronico: false,
+                    tempC: 65.0,
+                    deltaTC: 12.3,
+                    severidad: 'Media',
+                    equipo: 'Motor A',
+                    comentarios: 'Vibración leve detectada',
+                  ),
+                  _Problem(
+                    no: 2,
+                    fecha: DateTime.now(),
+                    numInspeccion: 'INS-001',
+                    tipo: 'Eléctrica',
+                    estatus: 'Cerrado',
+                    cronico: true,
+                    tempC: 72.2,
+                    deltaTC: 15.0,
+                    severidad: 'Alta',
+                    equipo: 'Tablero 1',
+                    comentarios: 'Ajuste de terminales',
+                  ),
+                ],
+                baselines: [
+                  _Baseline(
+                    numInspeccion: 'INS-BASE-01',
+                    equipo: 'Motor A',
+                    fecha: DateTime.now(),
+                    mtaC: 40.0,
+                    tempC: 42.5,
+                    ambC: 22.0,
+                    imgR: null,
+                    imgD: null,
+                    notas: 'Valores dentro de rango',
+                  ),
+                ],
+              ),
+              _TreeNode(
+                id: 'i001-a2',
+                title: 'Area 2',
+                barcode: 'A2-0002',
+                verified: false,
+                problems: [
+                  _Problem(
+                    no: 1,
+                    fecha: DateTime.now(),
+                    numInspeccion: 'INS-002',
+                    tipo: 'Mecánica',
+                    estatus: 'En progreso',
+                    cronico: false,
+                    tempC: 50.5,
+                    deltaTC: 5.5,
+                    severidad: 'Baja',
+                    equipo: 'Bomba B',
+                    comentarios: 'Requiere seguimiento',
+                  ),
+                ],
+                baselines: [
+                  _Baseline(
+                    numInspeccion: 'INS-BASE-02',
+                    equipo: 'Bomba B',
+                    fecha: DateTime.now(),
+                    mtaC: 38.0,
+                    tempC: 39.1,
+                    ambC: 23.0,
+                    imgR: null,
+                    imgD: null,
+                    notas: 'OK',
+                  ),
+                ],
+              ),
             ],
           ),
           _TreeNode(
@@ -346,7 +425,7 @@ class _CurrentInspectionSplitViewState extends State<_CurrentInspectionSplitView
               ),
             ),
 
-            // Inferior: Detalles (placeholder)
+            // Inferior: Detalles (tabs)
             Positioned(
               left: 0,
               top: topHeight,
@@ -356,7 +435,21 @@ class _CurrentInspectionSplitViewState extends State<_CurrentInspectionSplitView
                 title: 'Detalles',
                 icon: Icons.view_list_outlined,
                 borderColor: borderColor,
-                child: const Center(child: Text('Detalles de la seleccion')),
+                child: _DetailsTabs(
+                  node: _findById(_selectedId),
+                  onDeleteProblem: (p) => setState(() {
+                    final node = _findById(_selectedId);
+                    if (node != null) {
+                      node.problems.remove(p);
+                    }
+                  }),
+                  onDeleteBaseline: (b) => setState(() {
+                    final node = _findById(_selectedId);
+                    if (node != null) {
+                      node.baselines.remove(b);
+                    }
+                  }),
+                ),
               ),
             ),
 
@@ -460,14 +553,72 @@ class _TreeNode {
     this.barcode,
     this.verified = false,
     List<_TreeNode>? children,
-  }) : children = children ?? <_TreeNode>[];
+    List<_Problem>? problems,
+    List<_Baseline>? baselines,
+  })  : children = children ?? <_TreeNode>[],
+        problems = problems ?? <_Problem>[],
+        baselines = baselines ?? <_Baseline>[];
 
   final String id;
   String title;
   String? barcode;
   bool verified;
   final List<_TreeNode> children;
+  final List<_Problem> problems;
+  final List<_Baseline> baselines;
   bool get isLeaf => children.isEmpty;
+}
+
+class _Problem {
+  _Problem({
+    required this.no,
+    required this.fecha,
+    required this.numInspeccion,
+    required this.tipo,
+    required this.estatus,
+    required this.cronico,
+    required this.tempC,
+    required this.deltaTC,
+    required this.severidad,
+    required this.equipo,
+    required this.comentarios,
+  });
+
+  final int no;
+  final DateTime fecha;
+  final String numInspeccion;
+  final String tipo;
+  final String estatus;
+  final bool cronico;
+  final double tempC;
+  final double deltaTC;
+  final String severidad;
+  final String equipo;
+  final String comentarios;
+}
+
+class _Baseline {
+  _Baseline({
+    required this.numInspeccion,
+    required this.equipo,
+    required this.fecha,
+    required this.mtaC,
+    required this.tempC,
+    required this.ambC,
+    this.imgR,
+    this.imgD,
+    required this.notas,
+  });
+
+  final String numInspeccion;
+  final String equipo;
+  final DateTime fecha;
+  final double mtaC;
+  final double tempC;
+  final double ambC;
+  final String? imgR;
+  final String? imgD;
+  final String notas;
 }
 
 class _FlatNode {
@@ -633,6 +784,225 @@ class _ProgressTable extends StatelessWidget {
   }
 }
 
+class _DetailsTabs extends StatelessWidget {
+  const _DetailsTabs({required this.node, required this.onDeleteProblem, required this.onDeleteBaseline});
+  final _TreeNode? node;
+  final ValueChanged<_Problem> onDeleteProblem;
+  final ValueChanged<_Baseline> onDeleteBaseline;
+
+  @override
+  Widget build(BuildContext context) {
+    final problems = node?.problems ?? const <_Problem>[];
+    final baselines = node?.baselines ?? const <_Baseline>[];
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            color: Theme.of(context).colorScheme.surface,
+            child: const TabBar(
+              tabs: [
+                Tab(text: 'Listado de problemas'),
+                Tab(text: 'Listado Base Line'),
+              ],
+            ),
+          ),
+          const Divider(height: 0, thickness: 0.5),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _ProblemsTable(problems: problems, onDelete: onDeleteProblem),
+                _BaselineTable(baselines: baselines, onDelete: onDeleteBaseline),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProblemsTable extends StatelessWidget {
+  const _ProblemsTable({required this.problems, required this.onDelete});
+  final List<_Problem> problems;
+  final ValueChanged<_Problem> onDelete;
+
+  String _fmtDate(DateTime d) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${d.year}-${two(d.month)}-${two(d.day)}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final headerStyle = Theme.of(context).textTheme.labelLarge;
+    Widget cell(Widget child, int flex, {TextAlign? align}) => Expanded(
+          flex: flex,
+          child: Align(alignment: _toAlignment(align), child: child),
+        );
+
+    return Column(
+      children: [
+        Container(
+          color: Theme.of(context).colorScheme.surface,
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          child: Row(
+            children: [
+              cell(const Text('No', overflow: TextOverflow.ellipsis), 1),
+              cell(const Text('Fecha'), 2),
+              cell(const Text('Num Inspección'), 2),
+              cell(const Text('Tipo'), 2),
+              cell(const Text('Estatus'), 2),
+              cell(const Text('Cronico'), 1),
+              cell(const Text('Temp °C'), 1),
+              cell(const Text('Delta T °C'), 1),
+              cell(const Text('Severidad'), 2),
+              cell(const Text('Equipo'), 2),
+              cell(const Text('Comentarios'), 3),
+              cell(const Text('Op'), 1),
+            ],
+          ),
+        ),
+        const Divider(height: 0, thickness: 0.5),
+        Expanded(
+          child: problems.isEmpty
+              ? const Center(child: Text('Sin problemas'))
+              : ListView.separated(
+                  itemCount: problems.length,
+                  separatorBuilder: (_, __) => const Divider(height: 0, thickness: 0.5),
+                  itemBuilder: (context, index) {
+                    final p = problems[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                      child: Row(
+                        children: [
+                          cell(Text('${p.no}'), 1),
+                          cell(Text(_fmtDate(p.fecha)), 2),
+                          cell(Text(p.numInspeccion), 2),
+                          cell(Text(p.tipo), 2),
+                          cell(Text(p.estatus), 2),
+                          cell(Icon(p.cronico ? Icons.check_circle : Icons.radio_button_unchecked,
+                              color: p.cronico ? Colors.redAccent : Colors.grey, size: 18), 1),
+                          cell(Text(p.tempC.toStringAsFixed(1)), 1),
+                          cell(Text(p.deltaTC.toStringAsFixed(1)), 1),
+                          cell(Text(p.severidad), 2),
+                          cell(Text(p.equipo), 2),
+                          cell(Text(p.comentarios, overflow: TextOverflow.ellipsis), 3),
+                          cell(
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: IconButton(
+                                tooltip: 'Eliminar',
+                                onPressed: () => onDelete(p),
+                                icon: const Icon(Icons.delete_outline),
+                              ),
+                            ),
+                            1,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  Alignment _toAlignment(TextAlign? align) {
+    switch (align) {
+      case TextAlign.center:
+        return Alignment.center;
+      case TextAlign.right:
+        return Alignment.centerRight;
+      case TextAlign.left:
+      default:
+        return Alignment.centerLeft;
+    }
+  }
+}
+
+class _BaselineTable extends StatelessWidget {
+  const _BaselineTable({required this.baselines, required this.onDelete});
+  final List<_Baseline> baselines;
+  final ValueChanged<_Baseline> onDelete;
+
+  String _fmtDate(DateTime d) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${d.year}-${two(d.month)}-${two(d.day)}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final headerStyle = Theme.of(context).textTheme.labelLarge;
+    Widget cell(Widget child, int flex) => Expanded(
+          flex: flex,
+          child: child,
+        );
+    return Column(
+      children: [
+        Container(
+          color: Theme.of(context).colorScheme.surface,
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          child: Row(
+            children: [
+              cell(const Text('No Inpexxión'), 2),
+              cell(const Text('Equipo'), 2),
+              cell(const Text('Fecha'), 2),
+              cell(const Text('MTA °C'), 1),
+              cell(const Text('Temp °C'), 1),
+              cell(const Text('Amb °C'), 1),
+              cell(const Text('Img R'), 1),
+              cell(const Text('Img D'), 1),
+              cell(const Text('Notas'), 3),
+              cell(const Text('Op'), 1),
+            ],
+          ),
+        ),
+        const Divider(height: 0, thickness: 0.5),
+        Expanded(
+          child: baselines.isEmpty
+              ? const Center(child: Text('Sin base line'))
+              : ListView.separated(
+                  itemCount: baselines.length,
+                  separatorBuilder: (_, __) => const Divider(height: 0, thickness: 0.5),
+                  itemBuilder: (context, index) {
+                    final b = baselines[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                      child: Row(
+                        children: [
+                          cell(Text(b.numInspeccion), 2),
+                          cell(Text(b.equipo), 2),
+                          cell(Text(_fmtDate(b.fecha)), 2),
+                          cell(Text(b.mtaC.toStringAsFixed(1)), 1),
+                          cell(Text(b.tempC.toStringAsFixed(1)), 1),
+                          cell(Text(b.ambC.toStringAsFixed(1)), 1),
+                          cell(Icon(Icons.image, color: (b.imgR ?? '').isEmpty ? Colors.grey : Colors.blue), 1),
+                          cell(Icon(Icons.image, color: (b.imgD ?? '').isEmpty ? Colors.grey : Colors.blue), 1),
+                          cell(Text(b.notas, overflow: TextOverflow.ellipsis), 3),
+                          cell(
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: IconButton(
+                                tooltip: 'Eliminar',
+                                onPressed: () => onDelete(b),
+                                icon: const Icon(Icons.delete_outline),
+                              ),
+                            ),
+                            1,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+}
+
 class _HomeSection {
   const _HomeSection({
     required this.label,
@@ -644,4 +1014,3 @@ class _HomeSection {
   final IconData icon;
   final String route;
 }
-
