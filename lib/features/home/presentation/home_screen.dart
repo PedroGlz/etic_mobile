@@ -246,52 +246,133 @@ class _HomeCard extends StatelessWidget {
 /// Vista dividida en 3 partes para "Inspecci��n Actual":
 /// - Parte superior con dos paneles iguales (izquierda y derecha).
 /// - Parte inferior ocupando todo el ancho.
-class _CurrentInspectionSplitView extends StatelessWidget {
+class _CurrentInspectionSplitView extends StatefulWidget {
   const _CurrentInspectionSplitView();
 
   @override
+  State<_CurrentInspectionSplitView> createState() => _CurrentInspectionSplitViewState();
+}
+
+class _CurrentInspectionSplitViewState extends State<_CurrentInspectionSplitView> {
+  // Fracciones de espacio: alto de la fila superior y ancho del panel izquierdo
+  double _hFrac = 0.6; // 60% arriba, 40% abajo
+  double _vFrac = 0.5; // 50% izquierda, 50% derecha
+
+  // Límites para evitar colapsos
+  static const double _minFrac = 0.2;
+  static const double _maxFrac = 0.8;
+
+  // Grosor interactivo de las asas (invisible, sin huecos visuales)
+  static const double _handleThickness = 12.0;
+
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // Fila superior: dos paneles iguales
-          Expanded(
-            child: Row(
-              children: const [
-                Expanded(child: _SplitPanel(title: 'Resumen', icon: Icons.info_outline)),
-                SizedBox(width: 16),
-                Expanded(child: _SplitPanel(title: 'Progreso', icon: Icons.timeline_outlined)),
-              ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final height = constraints.maxHeight;
+
+        final topHeight = (height * _hFrac).clamp(height * _minFrac, height * _maxFrac);
+        final leftWidth = (width * _vFrac).clamp(width * _minFrac, width * _maxFrac);
+        final rightWidth = width - leftWidth;
+        final bottomHeight = height - topHeight;
+
+        final borderColor = Theme.of(context).dividerColor;
+
+        return Stack(
+          children: [
+            // Panel superior izquierdo (Resumen)
+            Positioned(
+              left: 0,
+              top: 0,
+              width: leftWidth,
+              height: topHeight,
+              child: _CellPanel(title: 'Resumen', icon: Icons.info_outline, borderColor: borderColor),
             ),
-          ),
-          const SizedBox(height: 16),
-          // Panel inferior: ocupa todo el ancho
-          const Expanded(
-            child: _SplitPanel(title: 'Detalles', icon: Icons.view_list_outlined),
-          ),
-        ],
-      ),
+            // Panel superior derecho (Progreso)
+            Positioned(
+              left: leftWidth,
+              top: 0,
+              width: rightWidth,
+              height: topHeight,
+              child: _CellPanel(title: 'Progreso', icon: Icons.timeline_outlined, borderColor: borderColor),
+            ),
+            // Panel inferior (Detalles) ocupa todo el ancho
+            Positioned(
+              left: 0,
+              top: topHeight,
+              width: width,
+              height: bottomHeight,
+              child: _CellPanel(title: 'Detalles', icon: Icons.view_list_outlined, borderColor: borderColor),
+            ),
+
+            // Asa vertical para redimensionar izquierda/derecha (sobre la fila superior)
+            Positioned(
+              left: leftWidth - (_handleThickness / 2),
+              top: 0,
+              width: _handleThickness,
+              height: topHeight,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.resizeLeftRight,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onPanUpdate: (details) {
+                    setState(() {
+                      _vFrac = (_vFrac + details.delta.dx / width).clamp(_minFrac, _maxFrac);
+                    });
+                  },
+                ),
+              ),
+            ),
+
+            // Asa horizontal para redimensionar alto arriba/abajo (entre fila superior e inferior)
+            Positioned(
+              left: 0,
+              top: topHeight - (_handleThickness / 2),
+              width: width,
+              height: _handleThickness,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.resizeUpDown,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onPanUpdate: (details) {
+                    setState(() {
+                      _hFrac = (_hFrac + details.delta.dy / height).clamp(_minFrac, _maxFrac);
+                    });
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
 
-/// Panel gen��rico utilizado en la vista dividida.
-class _SplitPanel extends StatelessWidget {
-  const _SplitPanel({required this.title, required this.icon});
+/// Panel tipo celda, sin márgenes entre sí.
+class _CellPanel extends StatelessWidget {
+  const _CellPanel({
+    required this.title,
+    required this.icon,
+    required this.borderColor,
+  });
 
   final String title;
   final IconData icon;
+  final Color borderColor;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      clipBehavior: Clip.antiAlias,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        width: double.infinity,
-        height: double.infinity,
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border.all(color: borderColor, width: 0.5),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -305,19 +386,13 @@ class _SplitPanel extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Expanded(
               child: Container(
                 width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
                 child: const Center(
-                  child: Text(
-                    'Contenido pr��ximo aqu��',
-                    textAlign: TextAlign.center,
-                  ),
+                  child: Text('Contenido próximamente aquí'),
                 ),
               ),
             ),
