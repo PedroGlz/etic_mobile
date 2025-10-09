@@ -44,9 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
         route: AppRoutes.home,
       ),
       _HomeSection(
-        label: 'Inspecciones',
-        icon: Icons.assignment_outlined,
-        route: AppRoutes.inspections,
+        label: 'Inspección Actual',
+        icon: Icons.fact_check,
+        route: AppRoutes.inspectionForm,
       ),
       _HomeSection(
         label: 'Sitios',
@@ -101,6 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListTileTheme(
             iconColor: Colors.white,
             textColor: Colors.white,
+            selectedColor: const Color.fromARGB(255, 255, 255, 161), // ← texto (y icono) en rojo cuando esté seleccionado
             child: Column(
               children: [
                 ListTile(
