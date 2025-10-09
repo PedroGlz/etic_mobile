@@ -1,35 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:etic_mobile/core/router/app_routes.dart';
 
-/// Pantalla principal que actúa como panel de control del sistema.
-///
-/// Contiene el menú lateral con navegación a las secciones:
-/// - Inicio
-/// - Inspecciones
-/// - Sitios
-/// - Clientes
-/// - Reportes
-/// - Ajustes
-///
-/// Además, incluye un botón en la AppBar para cerrar sesión.
 class HomeScreen extends StatefulWidget {
-  /// Crea una instancia de [HomeScreen].
-  ///
-  /// Requiere un callback [onLogout] que se ejecutará cuando el usuario
-  /// presione el botón de cerrar sesión.
   const HomeScreen({super.key, required this.onLogout});
 
-  /// Función que se ejecuta al cerrar sesión.
   final VoidCallback onLogout;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-/// Estado interno de [HomeScreen].
-///
-/// Administra las secciones disponibles en el menú lateral
-/// y controla la navegación dentro de la aplicación.
 class _HomeScreenState extends State<HomeScreen> {
   late final List<_HomeSection> _sections;
   int _selectedIndex = 0;
@@ -39,12 +19,12 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _sections = const <_HomeSection>[
       _HomeSection(
-        label: 'Inspección Actual',
+        label: 'Inspeccion Actual',
         icon: Icons.dashboard_outlined,
         route: AppRoutes.home,
       ),
       _HomeSection(
-        label: 'Inspección Actual',
+        label: 'Inspecciones',
         icon: Icons.fact_check,
         route: AppRoutes.inspectionForm,
       ),
@@ -71,13 +51,10 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
   }
 
-  /// Cambia la sección seleccionada y navega hacia la ruta correspondiente.
   void _openSection(int index) {
     setState(() => _selectedIndex = index);
     final route = _sections[index].route;
-
     if (route == AppRoutes.home) return;
-
     Navigator.of(context).pushNamed(route);
   }
 
@@ -88,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Panel principal'),
         actions: [
           IconButton(
-            tooltip: 'Cerrar sesión',
+            tooltip: 'Cerrar sesion',
             onPressed: widget.onLogout,
             icon: const Icon(Icons.logout),
           ),
@@ -101,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListTileTheme(
             iconColor: Colors.white,
             textColor: Colors.white,
-            selectedColor: const Color.fromARGB(255, 255, 255, 161), // ← texto (y icono) en rojo cuando esté seleccionado
+            selectedColor: const Color.fromARGB(255, 255, 255, 161),
             child: Column(
               children: [
                 ListTile(
@@ -112,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     fit: BoxFit.contain,
                   ),
                   title: const Text('ETIC System'),
-                  subtitle: const Text('Rafael García'),
+                  subtitle: const Text('Rafael Garcia'),
                 ),
                 const Divider(color: Colors.white24),
                 Expanded(
@@ -145,10 +122,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-/// Cuadrícula principal que muestra las tarjetas de acceso rápido.
-///
-/// Incluye accesos a las secciones más utilizadas del sistema
-/// como inspecciones, sitios, clientes, reportes y ajustes.
 class _HomeGrid extends StatelessWidget {
   const _HomeGrid();
 
@@ -156,7 +129,7 @@ class _HomeGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final cards = <Widget>[
       const _HomeCard(
-        label: 'Nueva inspección',
+        label: 'Nueva inspeccion',
         icon: Icons.add_task_outlined,
         route: AppRoutes.inspections,
       ),
@@ -196,10 +169,6 @@ class _HomeGrid extends StatelessWidget {
   }
 }
 
-/// Tarjeta individual que representa una sección dentro del [HomeScreen].
-///
-/// Cada tarjeta contiene un ícono y una etiqueta, y al presionarla
-/// navega a la ruta correspondiente mediante [Navigator.pushNamed].
 class _HomeCard extends StatelessWidget {
   const _HomeCard({
     required this.label,
@@ -207,13 +176,8 @@ class _HomeCard extends StatelessWidget {
     required this.route,
   });
 
-  /// Texto mostrado en la tarjeta.
   final String label;
-
-  /// Ícono principal de la tarjeta.
   final IconData icon;
-
-  /// Ruta a la que se navega al presionar la tarjeta.
   final String route;
 
   @override
@@ -243,9 +207,6 @@ class _HomeCard extends StatelessWidget {
   }
 }
 
-/// Vista dividida en 3 partes para "Inspecci��n Actual":
-/// - Parte superior con dos paneles iguales (izquierda y derecha).
-/// - Parte inferior ocupando todo el ancho.
 class _CurrentInspectionSplitView extends StatefulWidget {
   const _CurrentInspectionSplitView();
 
@@ -254,16 +215,76 @@ class _CurrentInspectionSplitView extends StatefulWidget {
 }
 
 class _CurrentInspectionSplitViewState extends State<_CurrentInspectionSplitView> {
-  // Fracciones de espacio: alto de la fila superior y ancho del panel izquierdo
   double _hFrac = 0.6; // 60% arriba, 40% abajo
   double _vFrac = 0.5; // 50% izquierda, 50% derecha
 
-  // Límites para evitar colapsos
   static const double _minFrac = 0.2;
   static const double _maxFrac = 0.8;
-
-  // Grosor interactivo de las asas (invisible, sin huecos visuales)
   static const double _handleThickness = 12.0;
+
+  late List<_TreeNode> _nodes;
+  final Set<String> _expanded = <String>{};
+  String? _selectedId;
+
+  @override
+  void initState() {
+    super.initState();
+    _nodes = [
+      _TreeNode(
+        id: 'i001',
+        title: 'Inspeccion 001',
+        children: [
+          _TreeNode(
+            id: 'i001-siteA',
+            title: 'Sitio: Planta A',
+            children: [
+              _TreeNode(id: 'i001-a1', title: 'Area 1', barcode: 'A1-0001', verified: true),
+              _TreeNode(id: 'i001-a2', title: 'Area 2', barcode: 'A2-0002', verified: false),
+            ],
+          ),
+          _TreeNode(
+            id: 'i001-findings',
+            title: 'Hallazgos',
+            children: [
+              _TreeNode(id: 'i001-sec', title: 'Seguridad', barcode: 'SEC-001', verified: false),
+              _TreeNode(id: 'i001-mant', title: 'Mantenimiento', barcode: 'MAN-002', verified: true),
+            ],
+          ),
+        ],
+      ),
+      _TreeNode(
+        id: 'i002',
+        title: 'Inspeccion 002',
+        children: [
+          _TreeNode(id: 'i002-siteB', title: 'Sitio: Planta B', barcode: 'PB-0001', verified: false),
+          _TreeNode(id: 'i002-findings', title: 'Hallazgos', barcode: 'HAL-0001', verified: false),
+        ],
+      ),
+    ];
+  }
+
+  _TreeNode? _findById(String? id, [List<_TreeNode>? list]) {
+    if (id == null) return null;
+    final nodes = list ?? _nodes;
+    for (final n in nodes) {
+      if (n.id == id) return n;
+      final found = _findById(id, n.children);
+      if (found != null) return found;
+    }
+    return null;
+  }
+
+  bool _removeById(String id, [List<_TreeNode>? list]) {
+    final nodes = list ?? _nodes;
+    for (int i = 0; i < nodes.length; i++) {
+      if (nodes[i].id == id) {
+        nodes.removeAt(i);
+        return true;
+      }
+      if (_removeById(id, nodes[i].children)) return true;
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -281,32 +302,65 @@ class _CurrentInspectionSplitViewState extends State<_CurrentInspectionSplitView
 
         return Stack(
           children: [
-            // Panel superior izquierdo (Resumen)
+            // Superior izquierdo: Resumen (TreeView)
             Positioned(
               left: 0,
               top: 0,
               width: leftWidth,
               height: topHeight,
-              child: _CellPanel(title: 'Resumen', icon: Icons.info_outline, borderColor: borderColor),
+              child: _CellPanel(
+                title: 'Resumen',
+                icon: Icons.info_outline,
+                borderColor: borderColor,
+                child: _SimpleTreeView(
+                  nodes: _nodes,
+                  expanded: _expanded,
+                  selectedId: _selectedId,
+                  onToggle: (id) => setState(() {
+                    if (!_expanded.remove(id)) _expanded.add(id);
+                  }),
+                  onSelect: (id) => setState(() {
+                    _selectedId = id;
+                  }),
+                ),
+              ),
             ),
-            // Panel superior derecho (Progreso)
+
+            // Superior derecho: Progreso (Tabla)
             Positioned(
               left: leftWidth,
               top: 0,
               width: rightWidth,
               height: topHeight,
-              child: _CellPanel(title: 'Progreso', icon: Icons.timeline_outlined, borderColor: borderColor),
+              child: _CellPanel(
+                title: 'Progreso',
+                icon: Icons.timeline_outlined,
+                borderColor: borderColor,
+                child: _ProgressTable(
+                  children: _findById(_selectedId)?.children ?? const <_TreeNode>[],
+                  onDelete: (node) => setState(() {
+                    if (_selectedId == node.id) _selectedId = null;
+                    _removeById(node.id);
+                  }),
+                ),
+              ),
             ),
-            // Panel inferior (Detalles) ocupa todo el ancho
+
+            // Inferior: Detalles (placeholder)
             Positioned(
               left: 0,
               top: topHeight,
               width: width,
               height: bottomHeight,
-              child: _CellPanel(title: 'Detalles', icon: Icons.view_list_outlined, borderColor: borderColor),
+              child: _CellPanel(
+                title: 'Detalles',
+                icon: Icons.view_list_outlined,
+                borderColor: borderColor,
+                child: const Center(child: Text('Detalles de la seleccion')),
+              ),
             ),
 
-            // Asa vertical para redimensionar izquierda/derecha (sobre la fila superior)
+            // Asa vertical
             Positioned(
               left: leftWidth - (_handleThickness / 2),
               top: 0,
@@ -325,7 +379,7 @@ class _CurrentInspectionSplitViewState extends State<_CurrentInspectionSplitView
               ),
             ),
 
-            // Asa horizontal para redimensionar alto arriba/abajo (entre fila superior e inferior)
+            // Asa horizontal
             Positioned(
               left: 0,
               top: topHeight - (_handleThickness / 2),
@@ -350,17 +404,18 @@ class _CurrentInspectionSplitViewState extends State<_CurrentInspectionSplitView
   }
 }
 
-/// Panel tipo celda, sin márgenes entre sí.
 class _CellPanel extends StatelessWidget {
   const _CellPanel({
     required this.title,
     required this.icon,
     required this.borderColor,
+    this.child,
   });
 
   final String title;
   final IconData icon;
   final Color borderColor;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -380,10 +435,7 @@ class _CellPanel extends StatelessWidget {
               children: [
                 Icon(icon, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                Text(title, style: Theme.of(context).textTheme.titleMedium),
               ],
             ),
             const SizedBox(height: 8),
@@ -391,9 +443,7 @@ class _CellPanel extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
-                child: const Center(
-                  child: Text('Contenido próximamente aquí'),
-                ),
+                child: child ?? const SizedBox.shrink(),
               ),
             ),
           ],
@@ -403,10 +453,186 @@ class _CellPanel extends StatelessWidget {
   }
 }
 
-/// Representa una sección dentro del menú lateral del [HomeScreen].
-///
-/// Cada sección contiene un [label], un [icon] y una [route]
-/// que define la pantalla a la que se navega.
+class _TreeNode {
+  _TreeNode({
+    required this.id,
+    required this.title,
+    this.barcode,
+    this.verified = false,
+    List<_TreeNode>? children,
+  }) : children = children ?? <_TreeNode>[];
+
+  final String id;
+  String title;
+  String? barcode;
+  bool verified;
+  final List<_TreeNode> children;
+  bool get isLeaf => children.isEmpty;
+}
+
+class _FlatNode {
+  const _FlatNode(this.node, this.depth, this.hasChildren, this.expanded);
+  final _TreeNode node;
+  final int depth;
+  final bool hasChildren;
+  final bool expanded;
+}
+
+class _SimpleTreeView extends StatelessWidget {
+  const _SimpleTreeView({
+    required this.nodes,
+    required this.expanded,
+    required this.selectedId,
+    required this.onToggle,
+    required this.onSelect,
+  });
+
+  final List<_TreeNode> nodes;
+  final Set<String> expanded;
+  final String? selectedId;
+  final ValueChanged<String> onToggle;
+  final ValueChanged<String> onSelect;
+
+  List<_FlatNode> _flatten(List<_TreeNode> nodes, int depth) {
+    final out = <_FlatNode>[];
+    for (final n in nodes) {
+      final hasChildren = n.children.isNotEmpty;
+      final isExpanded = expanded.contains(n.id);
+      out.add(_FlatNode(n, depth, hasChildren, isExpanded));
+      if (hasChildren && isExpanded) {
+        out.addAll(_flatten(n.children, depth + 1));
+      }
+    }
+    return out;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final flat = _flatten(nodes, 0);
+    final selColor = Theme.of(context).colorScheme.primary.withOpacity(0.10);
+    return ListView.separated(
+      itemCount: flat.length,
+      separatorBuilder: (_, __) => const Divider(height: 0, thickness: 0.5),
+      itemBuilder: (context, index) {
+        final item = flat[index];
+        final n = item.node;
+        final isSelected = selectedId == n.id;
+        return Container(
+          color: isSelected ? selColor : Colors.transparent,
+          child: Padding(
+            padding: EdgeInsets.only(left: (item.depth * 16).toDouble()),
+            child: Row(
+              children: [
+                if (item.hasChildren)
+                  IconButton(
+                    tooltip: item.expanded ? 'Contraer' : 'Expandir',
+                    visualDensity: VisualDensity.compact,
+                    iconSize: 18,
+                    onPressed: () => onToggle(n.id),
+                    icon: Icon(
+                      item.expanded ? Icons.expand_more : Icons.chevron_right,
+                    ),
+                  )
+                else
+                  const SizedBox(width: 40),
+                Icon(item.hasChildren ? Icons.folder_outlined : Icons.article_outlined, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: InkWell(
+                    onTap: () => onSelect(n.id),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(n.title),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ProgressTable extends StatelessWidget {
+  const _ProgressTable({required this.children, required this.onDelete});
+  final List<_TreeNode> children;
+  final ValueChanged<_TreeNode> onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final headerStyle = Theme.of(context).textTheme.labelLarge;
+    return Column(
+      children: [
+        Container(
+          color: Theme.of(context).colorScheme.surface,
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          child: Row(
+            children: [
+              _cell(const Text('Ubicacion'), flex: 3, style: headerStyle),
+              _cell(const Text('Codigo de barras'), flex: 2, style: headerStyle),
+              _cell(const Text('Estatus'), flex: 2, style: headerStyle),
+              _cell(const Text('Op'), flex: 1, style: headerStyle),
+            ],
+          ),
+        ),
+        const Divider(height: 0, thickness: 0.5),
+        Expanded(
+          child: children.isEmpty
+              ? const Center(child: Text('Sin elementos'))
+              : ListView.separated(
+                  itemCount: children.length,
+                  separatorBuilder: (_, __) => const Divider(height: 0, thickness: 0.5),
+                  itemBuilder: (context, index) {
+                    final n = children[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                      child: Row(
+                        children: [
+                          _cell(Text(n.title), flex: 3),
+                          _cell(Text(n.barcode ?? '-'), flex: 2),
+                          _cell(
+                            Text(n.verified ? 'Verificado' : 'Por verificar',
+                                style: TextStyle(
+                                  color: n.verified
+                                      ? Colors.green.shade700
+                                      : Colors.orange.shade700,
+                                )),
+                            flex: 2,
+                          ),
+                          _cell(
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: IconButton(
+                                tooltip: 'Eliminar',
+                                onPressed: () => onDelete(n),
+                                icon: const Icon(Icons.delete_outline),
+                              ),
+                            ),
+                            flex: 1,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _cell(Widget child, {required int flex, TextStyle? style}) {
+    return Expanded(
+      flex: flex,
+      child: DefaultTextStyle.merge(
+        style: style,
+        child: child,
+      ),
+    );
+  }
+}
+
 class _HomeSection {
   const _HomeSection({
     required this.label,
@@ -414,12 +640,8 @@ class _HomeSection {
     required this.route,
   });
 
-  /// Texto que identifica la sección.
   final String label;
-
-  /// Ícono que representa la sección.
   final IconData icon;
-
-  /// Ruta asociada a la sección.
   final String route;
 }
+
