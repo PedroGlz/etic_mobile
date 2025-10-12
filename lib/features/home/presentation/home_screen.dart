@@ -62,6 +62,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blue,
+        iconTheme: const IconThemeData(color: Colors.white),
+        actionsIconTheme: const IconThemeData(color: Colors.white),
+        toolbarHeight: 35,
+        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500),
         title: const Text('Panel principal'),
         actions: [
           IconButton(
@@ -340,6 +345,7 @@ class _CurrentInspectionSplitViewState extends State<_CurrentInspectionSplitView
         ],
       ),
     ];
+    _nodes.addAll(_generateMockNodes());
   }
 
   _TreeNode? _findById(String? id, [List<_TreeNode>? list]) {
@@ -363,6 +369,90 @@ class _CurrentInspectionSplitViewState extends State<_CurrentInspectionSplitView
       if (_removeById(id, nodes[i].children)) return true;
     }
     return false;
+  }
+
+  List<_TreeNode> _generateMockNodes() {
+    final List<_TreeNode> out = [];
+    const inspections = 4;
+    const sitesPerInspection = 10;
+    const areasPerSite = 10;
+    const equiposPerArea = 9; // ~4044 nodos totales aprox.
+
+    for (int i = 1; i <= inspections; i++) {
+      final insId = i.toString().padLeft(3, '0');
+      final inspection = _TreeNode(
+        id: 'ins$insId',
+        title: 'Inspeccion $insId',
+      );
+
+      for (int s = 1; s <= sitesPerInspection; s++) {
+        final site = _TreeNode(
+          id: 'ins$insId-site$s',
+          title: 'Sitio: Planta ${String.fromCharCode(64 + ((s - 1) % 26) + 1)}',
+          barcode: 'S$insId-${s.toString().padLeft(3, '0')}',
+          verified: s % 2 == 0,
+        );
+
+        for (int a = 1; a <= areasPerSite; a++) {
+          final area = _TreeNode(
+            id: 'ins$insId-site$s-area$a',
+            title: 'Area $a',
+            barcode: 'A$insId-$s-$a',
+            verified: a % 3 == 0,
+          );
+
+          for (int e = 1; e <= equiposPerArea; e++) {
+            final equipo = _TreeNode(
+              id: 'ins$insId-site$s-area$a-e$e',
+              title: 'Equipo $e',
+              barcode: 'EQ$insId-$s-$a-$e',
+              verified: e % 4 == 0,
+            );
+
+            if (e == 1) {
+              area.problems.add(
+                _Problem(
+                  no: a * 10 + e,
+                  fecha: DateTime.now(),
+                  numInspeccion: 'INS-$insId',
+                  tipo: 'Termica',
+                  estatus: (a % 2 == 0) ? 'Abierto' : 'Cerrado',
+                  cronico: a % 4 == 0,
+                  tempC: 40 + (e % 10).toDouble(),
+                  deltaTC: 5 + (e % 5).toDouble(),
+                  severidad: (a % 3 == 0) ? 'Alta' : 'Media',
+                  equipo: 'Equipo $e',
+                  comentarios: 'Mock generado',
+                ),
+              );
+              area.baselines.add(
+                _Baseline(
+                  numInspeccion: 'INS-BASE-$insId',
+                  equipo: 'Equipo $e',
+                  fecha: DateTime.now(),
+                  mtaC: 38.0,
+                  tempC: 39.0 + (e % 3),
+                  ambC: 23.0,
+                  imgR: null,
+                  imgD: null,
+                  notas: 'OK',
+                ),
+              );
+            }
+
+            area.children.add(equipo);
+          }
+
+          site.children.add(area);
+        }
+
+        inspection.children.add(site);
+      }
+
+      out.add(inspection);
+    }
+
+    return out;
   }
 
   @override
@@ -778,8 +868,8 @@ class _DetailsTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final problems = node?.problems ?? const <_Problem>[];
-    final baselines = node?.baselines ?? const <_Baseline>[];
+    final problems = node == null ? const <_Problem>[] : _collectProblems(node!);
+    final baselines = node == null ? const <_Baseline>[] : _collectBaselines(node!);
     return DefaultTabController(
       length: 2,
       child: Column(
@@ -806,6 +896,26 @@ class _DetailsTabs extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  List<_Problem> _collectProblems(_TreeNode root) {
+    final out = <_Problem>[];
+    void dfs(_TreeNode n) {
+      out.addAll(n.problems);
+      for (final c in n.children) dfs(c);
+    }
+    dfs(root);
+    return out;
+  }
+
+  List<_Baseline> _collectBaselines(_TreeNode root) {
+    final out = <_Baseline>[];
+    void dfs(_TreeNode n) {
+      out.addAll(n.baselines);
+      for (final c in n.children) dfs(c);
+    }
+    dfs(root);
+    return out;
   }
 }
 
