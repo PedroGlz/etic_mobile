@@ -107,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Center(
                       child: Image.asset(
-                        'assets/eticLogoLogin.png',
+                        'assets/img/eticLogoLogin.png',
                         height: 56,
                       ),
                     ),
@@ -158,11 +158,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             )
                           : const Text('Ingresar'),
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Demo: ${AppConstants.demoEmail} / ${AppConstants.demoPassword}',
-                      textAlign: TextAlign.center,
-                    ),
+                    // const SizedBox(height: 12),
+                    // Text(
+                    //   'Demo: ${AppConstants.demoEmail} / ${AppConstants.demoPassword}',
+                    //   textAlign: TextAlign.center,
+                    // ),
                   ],
                 ),
               ),

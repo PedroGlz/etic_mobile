@@ -23,31 +23,31 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: Icons.dashboard_outlined,
         route: AppRoutes.home,
       ),
-      _HomeSection(
-        label: 'Inspecciones',
-        icon: Icons.fact_check,
-        route: AppRoutes.inspectionForm,
-      ),
-      _HomeSection(
-        label: 'Sitios',
-        icon: Icons.factory_outlined,
-        route: AppRoutes.sites,
-      ),
-      _HomeSection(
-        label: 'Clientes',
-        icon: Icons.people_alt_outlined,
-        route: AppRoutes.clients,
-      ),
+      // _HomeSection(
+      //   label: 'Inspecciones',
+      //   icon: Icons.fact_check,
+      //   route: AppRoutes.inspectionForm,
+      // ),
+      // _HomeSection(
+      //   label: 'Sitios',
+      //   icon: Icons.factory_outlined,
+      //   route: AppRoutes.sites,
+      // ),
+      // _HomeSection(
+      //   label: 'Clientes',
+      //   icon: Icons.people_alt_outlined,
+      //   route: AppRoutes.clients,
+      // ),
       _HomeSection(
         label: 'Reportes',
         icon: Icons.bar_chart_outlined,
         route: AppRoutes.reports,
       ),
-      _HomeSection(
-        label: 'Ajustes',
-        icon: Icons.settings_outlined,
-        route: AppRoutes.settings,
-      ),
+      // _HomeSection(
+      //   label: 'Ajustes',
+      //   icon: Icons.settings_outlined,
+      //   route: AppRoutes.settings,
+      // ),
     ];
   }
 
@@ -63,15 +63,37 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
-        iconTheme: const IconThemeData(color: Colors.white),
-        actionsIconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white, size: 20),
+        actionsIconTheme: const IconThemeData(color: Colors.white, size: 20),
         toolbarHeight: 35,
         titleTextStyle: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500),
-        title: const Text('Panel principal'),
+        title: const Text('No. Inspección:'),
         actions: [
           IconButton(
-            tooltip: 'Cerrar sesion',
-            onPressed: widget.onLogout,
+            tooltip: 'Cerrar sesión',
+            iconSize: 20,
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  // title: const Text('Confirmar'),
+                  content: const Text('¿Deseas cerrar sesión?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancelar'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('Cerrar sesión'),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed == true) {
+                widget.onLogout();
+              }
+            },
             icon: const Icon(Icons.logout),
           ),
         ],
@@ -88,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 ListTile(
                   leading: Image.asset(
-                    'assets/img_etic_menu.png',
+                    'assets/img/img_etic_menu.png',
                     width: 40,
                     height: 40,
                     fit: BoxFit.contain,
@@ -237,7 +259,7 @@ class _CurrentInspectionSplitViewState extends State<_CurrentInspectionSplitView
     _nodes = [
       _TreeNode(
         id: 'i001',
-        title: 'Inspeccion 001',
+        title: 'SUBESCTACION 001',
         children: [
           _TreeNode(
             id: 'i001-siteA',
@@ -338,7 +360,7 @@ class _CurrentInspectionSplitViewState extends State<_CurrentInspectionSplitView
       ),
       _TreeNode(
         id: 'i002',
-        title: 'Inspeccion 002',
+        title: 'SUBESTACION 002',
         children: [
           _TreeNode(id: 'i002-siteB', title: 'Sitio: Planta B', barcode: 'PB-0001', verified: false),
           _TreeNode(id: 'i002-findings', title: 'Hallazgos', barcode: 'HAL-0001', verified: false),
@@ -382,7 +404,7 @@ class _CurrentInspectionSplitViewState extends State<_CurrentInspectionSplitView
       final insId = i.toString().padLeft(3, '0');
       final inspection = _TreeNode(
         id: 'ins$insId',
-        title: 'Inspeccion $insId',
+        title: 'SUBESTACION $insId',
       );
 
       for (int s = 1; s <= sitesPerInspection; s++) {

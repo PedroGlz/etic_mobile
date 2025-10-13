@@ -4,8 +4,11 @@ import 'package:etic_mobile/core/router/app_router.dart';
 import 'package:etic_mobile/core/theme/app_theme.dart';
 import 'package:etic_mobile/features/auth/presentation/login_screen.dart';
 import 'package:etic_mobile/features/home/presentation/home_screen.dart';
+import 'package:etic_mobile/core/db/db_initializer.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DbInitializer.ensureDatabaseCopied();
   runApp(const MyApp());
 }
 
