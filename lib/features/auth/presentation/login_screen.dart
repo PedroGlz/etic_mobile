@@ -1,24 +1,24 @@
-Ôªøimport 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:etic_mobile/core/constants.dart';
 import 'package:etic_mobile/core/utils/validators.dart';
-import 'package:etic_mobile/features/auth/data/mock_auth_repository.dart';
+import 'package:etic_mobile/features/auth/data/sqlite_auth_repository.dart';
 import 'package:etic_mobile/features/auth/domain/credentials.dart';
 
-/// Pantalla principal de inicio de sesi√≥n del sistema ETIC.
+/// Pantalla principal de inicio de sesiÛn del sistema ETIC.
 ///
-/// Permite al usuario autenticarse mediante correo y contrase√±a.
-/// Si las credenciales son v√°lidas, ejecuta la funci√≥n [onLoginSuccess].
+/// Permite al usuario autenticarse mediante correo y contraseÒa.
+/// Si las credenciales son v·lidas, ejecuta la funciÛn [onLoginSuccess].
 ///
-/// Esta pantalla usa un formulario con validaci√≥n y muestra un `SnackBar`
+/// Esta pantalla usa un formulario con validaciÛn y muestra un `SnackBar`
 /// si las credenciales son incorrectas.
 class LoginScreen extends StatefulWidget {
   /// Crea una instancia de [LoginScreen].
   ///
-  /// Requiere un callback [onLoginSuccess] que se ejecutar√°
-  /// cuando el inicio de sesi√≥n sea exitoso.
+  /// Requiere un callback [onLoginSuccess] que se ejecutar·
+  /// cuando el inicio de sesiÛn sea exitoso.
   const LoginScreen({super.key, required this.onLoginSuccess});
 
-  /// Callback que se ejecuta cuando el usuario inicia sesi√≥n correctamente.
+  /// Callback que se ejecuta cuando el usuario inicia sesiÛn correctamente.
   final VoidCallback onLoginSuccess;
 
   @override
@@ -27,8 +27,8 @@ class LoginScreen extends StatefulWidget {
 
 /// Estado interno de [LoginScreen].
 ///
-/// Contiene los controladores de texto, validaciones y la l√≥gica
-/// para manejar la autenticaci√≥n del usuario.
+/// Contiene los controladores de texto, validaciones y la lÛgica
+/// para manejar la autenticaciÛn del usuario.
 class _LoginScreenState extends State<LoginScreen> {
   /// Llave global para validar el formulario.
   final _formKey = GlobalKey<FormState>();
@@ -36,22 +36,22 @@ class _LoginScreenState extends State<LoginScreen> {
   /// Controlador del campo de usuario.
   final _userCtrl = TextEditingController();
 
-  /// Controlador del campo de contrase√±a.
+  /// Controlador del campo de contraseÒa.
   final _passCtrl = TextEditingController();
 
-  /// Repositorio de autenticaci√≥n (mock).
-  final _authRepository = MockAuthRepository();
+  /// Repositorio de autenticaciÛn (mock).
+  final _authRepository = SqliteAuthRepository();
 
-  /// Indica si se est√° procesando el inicio de sesi√≥n.
+  /// Indica si se est· procesando el inicio de sesiÛn.
   bool _isLoading = false;
 
-  /// Indica si el campo de contrase√±a est√° oculto.
+  /// Indica si el campo de contraseÒa est· oculto.
   bool _obscure = true;
 
-  /// Inicia sesi√≥n con las credenciales ingresadas.
+  /// Inicia sesiÛn con las credenciales ingresadas.
   ///
   /// Valida el formulario, muestra un `SnackBar` si las credenciales
-  /// no son v√°lidas y, en caso exitoso, ejecuta [onLoginSuccess].
+  /// no son v·lidas y, en caso exitoso, ejecuta [onLoginSuccess].
   Future<void> _login() async {
     final currentState = _formKey.currentState;
     if (currentState == null || !currentState.validate()) return;
@@ -71,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
       widget.onLoginSuccess();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Usuario o contrase√±a incorrectos')),
+        const SnackBar(content: Text('Usuario o contraseÒa incorrectos')),
       );
     }
 
@@ -88,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Fondo s√≥lido para toda la pantalla
+      // Fondo sÛlido para toda la pantalla
       backgroundColor: const Color(0xFFAB0202),
 
       body: Center(
@@ -125,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: _passCtrl,
                       obscureText: _obscure,
                       decoration: InputDecoration(
-                        labelText: 'Contrase√±a',
+                        labelText: 'ContraseÒa',
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           onPressed: () =>

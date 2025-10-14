@@ -1,9 +1,20 @@
+import 'package:sqflite/sqflite.dart';
+import 'package:etic_mobile/core/db/db_initializer.dart';
+
 class AppDatabase {
-  Future<void> open() async {
-    // TODO(generated): Open database connection (Sqflite/Drift)
+  AppDatabase._();
+
+  static Database? _instance;
+
+  static Future<Database> get instance async {
+    if (_instance != null) return _instance!;
+    final path = await DbInitializer.ensureDatabaseCopied();
+    _instance = await openDatabase(path);
+    return _instance!;
   }
 
-  Future<void> close() async {
-    // TODO(generated): Close database connection
+  static Future<void> close() async {
+    await _instance?.close();
+    _instance = null;
   }
 }
